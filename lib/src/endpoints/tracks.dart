@@ -29,14 +29,16 @@ class Tracks extends EndpointBase {
   }
 
   /// queries track batches of size [queryLimit] from [trackIds] and yields Track object Iterables
-  Stream<Iterable<Track>> listInBatches(Iterable<String> trackIds, [int batchSize=50]) async* {
+  Stream<Iterable<Track>> listInBatches(Iterable<String> trackIds,
+      [int batchSize = 50]) async* {
     for (var batch in batches(trackIds, batchSize)) {
       yield await list(batch);
     }
   }
 
   /// queries track batches of size [queryLimit] from [trackIds] and yields the Track objects
-  Stream<Track> tracksStream(Iterable<String> trackIds, [int queryLimit=50]) async* {
+  Stream<Track> tracksStream(Iterable<String> trackIds,
+      [int queryLimit = 50]) async* {
     await for (var batch in listInBatches(trackIds)) {
       yield* Stream.fromIterable(batch);
     }
@@ -74,5 +76,15 @@ class TracksMe extends EndpointPaging {
     var limit = ids.length < 50 ? ids.length : 50;
     var idsParam = ids.sublist(0, limit).join(',');
     await _api._put('$_path?ids=$idsParam', '');
+  }
+
+  Future<Null> deleteOne(String id) {
+    return delete([id]);
+  }
+
+  Future<Null> delete(List<String> ids) async {
+    var limit = ids.length < 50 ? ids.length : 50;
+    var idsParam = ids.sublist(0, limit).join(',');
+    await _api._delete('$_path?ids=$idsParam', '');
   }
 }
